@@ -1,0 +1,21 @@
+# Environment and secrets
+.env
+
+# Python virtual environment and cache
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# PHP dependencies (if added later)
+vendor/
+
+# Private runtime files (uploads and logs)
+storage/uploads/
+storage/logs/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
