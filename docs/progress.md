@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 1 completed — Ready for Phase 2 (Database & CSV import)
-Last confirmed result: PHP PDO connected to `ai_reporting` (MySQL 8.0.46) via `php-app/tests/test_db_connection.php`.
+## Current step: Phase 2 in progress — Next: Session.php & Csrf.php (Step 15)
+Last confirmed result: Applied `database/schema/001_initial_schema.sql` (`users`, `datasets`, `reports` created in `ai_reporting`).
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -21,7 +21,7 @@ Blocking issue (if any): None.
 - [x] MySQL connection verified from PHP (`php-app/app/Core/Database.php`)
 
 ### Phase 2 — Database & CSV import
-- [ ] Schema scripts applied
+- [x] Schema scripts applied (`database/schema/001_initial_schema.sql`)
 - [ ] Registration/login (basic) works
 - [ ] Upload (limits, private storage) works
 - [ ] `/validate` works; preview shown; confirm works
