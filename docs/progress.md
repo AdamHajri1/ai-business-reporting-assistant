@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 2 in progress — Next: Session.php & Csrf.php (Step 15)
-Last confirmed result: Applied `database/schema/001_initial_schema.sql` (`users`, `datasets`, `reports` created in `ai_reporting`).
+## Current step: Phase 2 in progress — Next: Install Pandas & build FastAPI /validate (Step 22)
+Last confirmed result: Basic auth (register/login/logout, CSRF, throttling) and secure CSV upload (`storage/uploads/`) verified in the browser.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -22,8 +22,8 @@ Blocking issue (if any): None.
 
 ### Phase 2 — Database & CSV import
 - [x] Schema scripts applied (`database/schema/001_initial_schema.sql`)
-- [ ] Registration/login (basic) works
-- [ ] Upload (limits, private storage) works
+- [x] Registration/login (basic) works
+- [x] Upload (limits, private storage) works
 - [ ] `/validate` works; preview shown; confirm works
 - [ ] Invalid-file cases tested
 

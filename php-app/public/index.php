@@ -2,20 +2,40 @@
 
 declare(strict_types=1);
 
-header('Content-Type: text/html; charset=UTF-8');
+$config = require dirname(__DIR__) . '/config/config.php';
 
-$appName = 'AI Business Reporting Assistant';
-$phpVersion = PHP_VERSION;
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></title>
-</head>
-<body>
-    <h1><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></h1>
-    <p>PHP front controller is running (PHP <?= htmlspecialchars($phpVersion, ENT_QUOTES, 'UTF-8') ?>).</p>
-</body>
-</html>
+ini_set('display_errors', $config['app']['debug'] ? '1' : '0');
+error_reporting(E_ALL);
+
+require_once dirname(__DIR__) . '/app/Core/Database.php';
+require_once dirname(__DIR__) . '/app/Core/Session.php';
+require_once dirname(__DIR__) . '/app/Core/Csrf.php';
+require_once dirname(__DIR__) . '/app/Core/Response.php';
+require_once dirname(__DIR__) . '/app/Core/Router.php';
+require_once dirname(__DIR__) . '/app/Models/User.php';
+require_once dirname(__DIR__) . '/app/Models/Dataset.php';
+require_once dirname(__DIR__) . '/app/Services/UploadService.php';
+require_once dirname(__DIR__) . '/app/Middleware/AuthMiddleware.php';
+require_once dirname(__DIR__) . '/app/Controllers/AuthController.php';
+require_once dirname(__DIR__) . '/app/Controllers/DatasetController.php';
+
+Session::start();
+
+$pdo = Database::connect($config['db']);
+$userModel = new User($pdo);
+$datasetModel = new Dataset($pdo);
+
+$uploadsDir = dirname(__DIR__, 2) . '/storage/uploads';
+$uploadService = new UploadService($uploadsDir);
+
+$authController = new AuthController($userModel);
+$datasetController = new DatasetController($datasetModel, $uploadService);
+
+$router = new Router();
+$registerRoutes = require dirname(__DIR__) . '/routes/web.php';
+$registerRoutes($router, $authController, $datasetController);
+
+$router->dispatch(
+    $_SERVER['REQUEST_METHOD'] ?? 'GET',
+    $_SERVER['REQUEST_URI'] ?? '/'
+);
