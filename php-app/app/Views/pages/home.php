@@ -4,6 +4,7 @@
 /** @var array<int, array<string, mixed>> $datasets */
 /** @var string|null $successMessage */
 /** @var string|null $errorMessage */
+/** @var array<int, array<string, mixed>> $reports */
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,6 +93,44 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </table>
+            <?php endif; ?>
+        </section>
+        <hr>
+
+        <section>
+            <h2>Saved Executive Reports</h2>
+
+            <?php if ($reports === []): ?>
+                <p>No reports generated yet. Open a ready dataset's analytics page to generate one.</p>
+            <?php else: ?>
+                <table border="1" cellpadding="6" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Report #</th>
+                            <th>Dataset</th>
+                            <th>Period</th>
+                            <th>Engine</th>
+                            <th>Created At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($reports as $report): ?>
+                            <tr>
+                                <td>#<?= (int) $report['id'] ?></td>
+                                <td><?= htmlspecialchars((string) $report['original_filename'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td>
+                                    <?= htmlspecialchars((string) $report['period_start'] . ' → ' . (string) $report['period_end'], ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td><?= htmlspecialchars((string) $report['ai_model'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars((string) $report['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td>
+                                    <a href="/reports/show?id=<?= (int) $report['id'] ?>">View Report</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
                 </table>
             <?php endif; ?>
         </section>

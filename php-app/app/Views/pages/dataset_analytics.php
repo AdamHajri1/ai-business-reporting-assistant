@@ -4,6 +4,7 @@
 /** @var array<string, mixed>|null $analytics */
 /** @var array{start_date: string, end_date: string} $filters */
 /** @var string|null $errorMessage */
+/** @var string $csrfToken */
 
 $kpis = is_array($analytics['kpis'] ?? null) ? $analytics['kpis'] : null;
 $monthlyTrends = is_array($analytics['monthly_trends'] ?? null) ? $analytics['monthly_trends'] : [];
@@ -46,6 +47,15 @@ $comparison = is_array($analytics['period_comparison'] ?? null) ? $analytics['pe
 
         <?php if ($kpis !== null): ?>
             <hr>
+            <section>
+                <form method="POST" action="/reports/generate">
+                    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="dataset_id" value="<?= htmlspecialchars((string) $dataset['id'], ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="start_date" value="<?= htmlspecialchars($filters['start_date'], ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="end_date" value="<?= htmlspecialchars($filters['end_date'], ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit">Generate &amp; Save Executive Report</button>
+                </form>
+            </section>
             <section>
                 <h2>Key Performance Indicators (KPIs)</h2>
                 <ul>

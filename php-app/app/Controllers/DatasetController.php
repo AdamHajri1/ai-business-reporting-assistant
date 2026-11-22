@@ -7,7 +7,8 @@ final class DatasetController
     public function __construct(
         private Dataset $datasetModel,
         private UploadService $uploadService,
-        private AnalyticsClient $analyticsClient
+        private AnalyticsClient $analyticsClient,
+        private Report $reportModel
     ) {
     }
 
@@ -17,6 +18,7 @@ final class DatasetController
         $userId = (int) $user['id'];
 
         $datasets = $this->datasetModel->findAllForUser($userId);
+        $reports = $this->reportModel->findAllForUser($userId);
 
         $successMessage = Session::get('flash_success');
         $errorMessage = Session::get('flash_error');
@@ -27,6 +29,7 @@ final class DatasetController
             'user' => $user,
             'csrfToken' => Csrf::token(),
             'datasets' => $datasets,
+            'reports' => $reports,
             'successMessage' => is_string($successMessage) ? $successMessage : null,
             'errorMessage' => is_string($errorMessage) ? $errorMessage : null,
         ]);
@@ -177,6 +180,7 @@ final class DatasetController
 
             Response::view('pages/dataset_analytics', [
                 'user' => $user,
+                'csrfToken' => Csrf::token(),
                 'dataset' => $dataset,
                 'analytics' => null,
                 'filters' => ['start_date' => $startDate, 'end_date' => $endDate],
@@ -187,6 +191,7 @@ final class DatasetController
 
         Response::view('pages/dataset_analytics', [
             'user' => $user,
+            'csrfToken' => Csrf::token(),
             'dataset' => $dataset,
             'analytics' => $analysis['data'],
             'filters' => ['start_date' => $startDate, 'end_date' => $endDate],

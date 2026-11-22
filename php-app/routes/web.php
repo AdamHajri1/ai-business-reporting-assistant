@@ -5,13 +5,17 @@ declare(strict_types=1);
 return static function (
     Router $router,
     AuthController $authController,
-    DatasetController $datasetController
+    DatasetController $datasetController,
+    ReportController $reportController
 ): void {
     $router->get('/', [$datasetController, 'index']);
     $router->post('/datasets/upload', [$datasetController, 'upload']);
     $router->get('/datasets/preview', [$datasetController, 'preview']);
     $router->post('/datasets/confirm', [$datasetController, 'confirm']);
     $router->get('/datasets/analyze', [$datasetController, 'analyze']);
+
+    $router->post('/reports/generate', [$reportController, 'generate']);
+    $router->get('/reports/show', [$reportController, 'show']);
 
     $router->get('/register', [$authController, 'showRegister']);
     $router->post('/register', [$authController, 'register']);

@@ -19,23 +19,27 @@ require_once dirname(__DIR__) . '/app/Services/AnalyticsClient.php';
 require_once dirname(__DIR__) . '/app/Middleware/AuthMiddleware.php';
 require_once dirname(__DIR__) . '/app/Controllers/AuthController.php';
 require_once dirname(__DIR__) . '/app/Controllers/DatasetController.php';
+require_once dirname(__DIR__) . '/app/Models/Report.php';
+require_once dirname(__DIR__) . '/app/Controllers/ReportController.php';
 
 Session::start();
 
 $pdo = Database::connect($config['db']);
 $userModel = new User($pdo);
 $datasetModel = new Dataset($pdo);
+$reportModel = new Report($pdo);
 
 $uploadsDir = dirname(__DIR__, 2) . '/storage/uploads';
 $uploadService = new UploadService($uploadsDir);
+$analyticsClient = new AnalyticsClient($config['analytics']['url']);
 
 $authController = new AuthController($userModel);
-$analyticsClient = new AnalyticsClient($config['analytics']['url']);
-$datasetController = new DatasetController($datasetModel, $uploadService, $analyticsClient);
+$datasetController = new DatasetController($datasetModel, $uploadService, $analyticsClient, $reportModel);
+$reportController = new ReportController($datasetModel, $reportModel, $analyticsClient);
 
 $router = new Router();
 $registerRoutes = require dirname(__DIR__) . '/routes/web.php';
-$registerRoutes($router, $authController, $datasetController);
+$registerRoutes($router, $authController, $datasetController, $reportController);
 
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

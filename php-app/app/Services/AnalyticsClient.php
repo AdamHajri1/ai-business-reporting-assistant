@@ -50,6 +50,26 @@ final class AnalyticsClient
         return $this->request('POST', '/analyze', $payload);
     }
     /**
+     * @return array{ok: bool, data?: array<string, mixed>, error?: string}
+     */
+    public function summarizeDataset(
+        string $datasetId,
+        ?string $startDate = null,
+        ?string $endDate = null
+    ): array {
+        $payload = ['dataset_id' => $datasetId];
+
+        if ($startDate !== null && $startDate !== '') {
+            $payload['start_date'] = $startDate;
+        }
+
+        if ($endDate !== null && $endDate !== '') {
+            $payload['end_date'] = $endDate;
+        }
+
+        return $this->request('POST', '/summarize', $payload);
+    }
+    /**
      * @param array<string, mixed>|null $payload
      * @return array{ok: bool, data?: array<string, mixed>, error?: string}
      */

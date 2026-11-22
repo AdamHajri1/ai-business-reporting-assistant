@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 3 completed — Ready for Phase 4 (AI executive summaries & saved reports)
-Last confirmed result: Pandas KPI engine (`kpi_engine.py`), FastAPI `POST /analyze`, 9 `pytest` tests, PHP `AnalyticsClient::analyzeDataset()`, and the browser analytics view with date filtering verified end-to-end.
+## Current step: Phase 4 completed — Ready for Phase 5 (SaaS UI, charts & export)
+Last confirmed result: Executive summary engine (`summary_engine.py`, `POST /summarize`, 12 `pytest` tests), MySQL report persistence (`Report.php`, `ReportController.php`), and `/reports/show` verified end-to-end.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -33,10 +33,11 @@ Blocking issue (if any): None.
 - [x] `POST /analyze` exposed and verified with 9 passing `pytest` tests
 - [x] PHP analytics view and date-range filtering verified in the browser
 
-### Phase 4 — PHP/FastAPI integration
-- [ ] `AnalyticsClient` with timeouts
-- [ ] Success path works
-- [ ] Service-down / timeout / bad JSON handled
+### Phase 4 — AI executive summaries & saved reports
+- [x] Deterministic executive summary engine (`summary_engine.py`) and `POST /summarize` built
+- [x] 12 `pytest` tests passing (KPI engine, `/analyze`, `/summarize`)
+- [x] `Report.php` model, `ReportController.php`, and `/reports/show` implemented
+- [x] Report generation, MySQL persistence, and dashboard listing verified in the browser
 
 ### Phase 5 — Dashboard
 - [ ] Layout shell + responsive nav
