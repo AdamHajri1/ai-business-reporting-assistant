@@ -15,6 +15,7 @@ require_once dirname(__DIR__) . '/app/Core/Router.php';
 require_once dirname(__DIR__) . '/app/Models/User.php';
 require_once dirname(__DIR__) . '/app/Models/Dataset.php';
 require_once dirname(__DIR__) . '/app/Services/UploadService.php';
+require_once dirname(__DIR__) . '/app/Services/AnalyticsClient.php';
 require_once dirname(__DIR__) . '/app/Middleware/AuthMiddleware.php';
 require_once dirname(__DIR__) . '/app/Controllers/AuthController.php';
 require_once dirname(__DIR__) . '/app/Controllers/DatasetController.php';
@@ -29,7 +30,8 @@ $uploadsDir = dirname(__DIR__, 2) . '/storage/uploads';
 $uploadService = new UploadService($uploadsDir);
 
 $authController = new AuthController($userModel);
-$datasetController = new DatasetController($datasetModel, $uploadService);
+$analyticsClient = new AnalyticsClient($config['analytics']['url']);
+$datasetController = new DatasetController($datasetModel, $uploadService, $analyticsClient);
 
 $router = new Router();
 $registerRoutes = require dirname(__DIR__) . '/routes/web.php';

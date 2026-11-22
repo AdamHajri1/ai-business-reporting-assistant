@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 2 in progress — Next: Install Pandas & build FastAPI /validate (Step 22)
-Last confirmed result: Basic auth (register/login/logout, CSRF, throttling) and secure CSV upload (`storage/uploads/`) verified in the browser.
+## Current step: Phase 2 completed — Ready for Phase 3 (Analytics engine)
+Last confirmed result: End-to-end CSV upload, FastAPI `/validate` (Pandas 3.1.1), preview, confirmation (`ready`), and invalid CSV rejection (`rejected`) verified in the browser.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -24,8 +24,8 @@ Blocking issue (if any): None.
 - [x] Schema scripts applied (`database/schema/001_initial_schema.sql`)
 - [x] Registration/login (basic) works
 - [x] Upload (limits, private storage) works
-- [ ] `/validate` works; preview shown; confirm works
-- [ ] Invalid-file cases tested
+- [x] `/validate` works; preview shown; confirm works
+- [x] Invalid-file cases tested
 
 ### Phase 3 — Analytics engine
 - [ ] Revenue, orders, units, AOV tested

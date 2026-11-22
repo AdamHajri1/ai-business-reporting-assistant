@@ -6,7 +6,8 @@ final class DatasetController
 {
     public function __construct(
         private Dataset $datasetModel,
-        private UploadService $uploadService
+        private UploadService $uploadService,
+        private AnalyticsClient $analyticsClient
     ) {
     }
 
@@ -53,15 +54,92 @@ final class DatasetController
             Response::redirect('/');
         }
 
+        $datasetId = (string) $result['dataset_id'];
+
         $this->datasetModel->create(
-            (string) $result['dataset_id'],
+            $datasetId,
             $userId,
             (string) $result['original_filename'],
             (string) $result['stored_filename'],
             (int) $result['file_size_bytes']
         );
 
-        Session::set('flash_success', 'CSV uploaded successfully. Ready for validation.');
+        Response::redirect('/datasets/preview?id=' . urlencode($datasetId));
+    }
+
+    public function preview(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        $datasetId = trim((string) ($_GET['id'] ?? ''));
+        $dataset = $datasetId !== '' ? $this->datasetModel->findByIdForUser($datasetId, $userId) : null;
+
+        if ($dataset === null) {
+            Session::set('flash_error', 'Dataset not found.');
+            Response::redirect('/');
+        }
+
+        $validation = $this->analyticsClient->validateDataset($datasetId);
+
+        if (!$validation['ok']) {
+            Session::set('flash_error', (string) ($validation['error'] ?? 'Validation service failed.'));
+            Response::redirect('/');
+        }
+
+        $data = $validation['data'];
+        $isValid = (bool) ($data['is_valid'] ?? false);
+        $newStatus = $dataset['status'] === 'ready'
+            ? 'ready'
+            : ($isValid ? 'validated' : 'rejected');
+
+        $this->datasetModel->updateValidation(
+            $datasetId,
+            $userId,
+            (int) ($data['row_count'] ?? 0),
+            (int) ($data['valid_row_count'] ?? 0),
+            (int) ($data['error_row_count'] ?? 0),
+            isset($data['date_min']) ? (string) $data['date_min'] : null,
+            isset($data['date_max']) ? (string) $data['date_max'] : null,
+            $newStatus
+        );
+
+        $dataset['status'] = $newStatus;
+
+        Response::view('pages/dataset_preview', [
+            'user' => $user,
+            'csrfToken' => Csrf::token(),
+            'dataset' => $dataset,
+            'validation' => $data,
+        ]);
+    }
+
+    public function confirm(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        if (!Csrf::verify($_POST['_csrf_token'] ?? null)) {
+            Session::set('flash_error', 'Invalid security token. Please try again.');
+            Response::redirect('/');
+        }
+
+        $datasetId = trim((string) ($_POST['dataset_id'] ?? ''));
+        $dataset = $datasetId !== '' ? $this->datasetModel->findByIdForUser($datasetId, $userId) : null;
+
+        if ($dataset === null) {
+            Session::set('flash_error', 'Dataset not found.');
+            Response::redirect('/');
+        }
+
+        if ($dataset['status'] !== 'validated') {
+            Session::set('flash_error', 'Only validated datasets can be confirmed.');
+            Response::redirect('/');
+        }
+
+        $this->datasetModel->updateStatus($datasetId, $userId, 'ready');
+
+        Session::set('flash_success', 'Dataset confirmed and ready for analytics.');
         Response::redirect('/');
     }
 }

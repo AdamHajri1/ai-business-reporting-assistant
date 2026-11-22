@@ -55,12 +55,15 @@
                 <p>No datasets uploaded yet.</p>
             <?php else: ?>
                 <table border="1" cellpadding="6" cellspacing="0">
+                    <table border="1" cellpadding="6" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Filename</th>
                             <th>Size</th>
+                            <th>Rows (Valid / Total)</th>
+                            <th>Date Range</th>
                             <th>Status</th>
-                            <th>Uploaded At</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,11 +71,24 @@
                             <tr>
                                 <td><?= htmlspecialchars((string) $dataset['original_filename'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><?= htmlspecialchars(number_format(((int) $dataset['file_size_bytes']) / 1024, 1) . ' KB', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= (int) $dataset['valid_row_count'] ?> / <?= (int) $dataset['row_count'] ?></td>
+                                <td>
+                                    <?php if (!empty($dataset['date_min']) && !empty($dataset['date_max'])): ?>
+                                        <?= htmlspecialchars((string) $dataset['date_min'] . ' → ' . (string) $dataset['date_max'], ENT_QUOTES, 'UTF-8') ?>
+                                    <?php else: ?>
+                                        —
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= htmlspecialchars((string) $dataset['status'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars((string) $dataset['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td>
+                                    <a href="/datasets/preview?id=<?= urlencode((string) $dataset['id']) ?>">
+                                        <?= $dataset['status'] === 'ready' ? 'View Preview' : 'Validate / Preview' ?>
+                                    </a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
+                </table>
                 </table>
             <?php endif; ?>
         </section>
