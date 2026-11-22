@@ -11,6 +11,7 @@ return static function (
     $router->post('/datasets/upload', [$datasetController, 'upload']);
     $router->get('/datasets/preview', [$datasetController, 'preview']);
     $router->post('/datasets/confirm', [$datasetController, 'confirm']);
+    $router->get('/datasets/analyze', [$datasetController, 'analyze']);
 
     $router->get('/register', [$authController, 'showRegister']);
     $router->post('/register', [$authController, 'register']);

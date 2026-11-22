@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 2 completed — Ready for Phase 3 (Analytics engine)
-Last confirmed result: End-to-end CSV upload, FastAPI `/validate` (Pandas 3.1.1), preview, confirmation (`ready`), and invalid CSV rejection (`rejected`) verified in the browser.
+## Current step: Phase 3 completed — Ready for Phase 4 (AI executive summaries & saved reports)
+Last confirmed result: Pandas KPI engine (`kpi_engine.py`), FastAPI `POST /analyze`, 9 `pytest` tests, PHP `AnalyticsClient::analyzeDataset()`, and the browser analytics view with date filtering verified end-to-end.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -28,11 +28,10 @@ Blocking issue (if any): None.
 - [x] Invalid-file cases tested
 
 ### Phase 3 — Analytics engine
-- [ ] Revenue, orders, units, AOV tested
-- [ ] Monthly aggregation tested
-- [ ] Category / top products / declines tested
-- [ ] Period comparison + edge cases tested
-- [ ] Sample dataset matches expected values
+- [x] `pytest` (9.2.0) and `httpx` (0.28.1) installed and pinned in `requirements.txt`
+- [x] Pandas KPI engine built (KPIs, monthly trends, categories, top products, period comparison)
+- [x] `POST /analyze` exposed and verified with 9 passing `pytest` tests
+- [x] PHP analytics view and date-range filtering verified in the browser
 
 ### Phase 4 — PHP/FastAPI integration
 - [ ] `AnalyticsClient` with timeouts

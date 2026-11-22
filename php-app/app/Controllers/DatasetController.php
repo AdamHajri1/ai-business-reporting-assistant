@@ -142,4 +142,55 @@ final class DatasetController
         Session::set('flash_success', 'Dataset confirmed and ready for analytics.');
         Response::redirect('/');
     }
+    public function analyze(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        $datasetId = trim((string) ($_GET['id'] ?? ''));
+        $dataset = $datasetId !== '' ? $this->datasetModel->findByIdForUser($datasetId, $userId) : null;
+
+        if ($dataset === null) {
+            Session::set('flash_error', 'Dataset not found.');
+            Response::redirect('/');
+        }
+
+        if ($dataset['status'] !== 'ready') {
+            Session::set('flash_error', 'Please validate and confirm this dataset before viewing analytics.');
+            Response::redirect('/datasets/preview?id=' . urlencode($datasetId));
+        }
+
+        $startDate = trim((string) ($_GET['start_date'] ?? ''));
+        $endDate = trim((string) ($_GET['end_date'] ?? ''));
+
+        $analysis = $this->analyticsClient->analyzeDataset(
+            $datasetId,
+            $startDate !== '' ? $startDate : null,
+            $endDate !== '' ? $endDate : null
+        );
+
+        if (!$analysis['ok']) {
+            if ($startDate === '' && $endDate === '') {
+                Session::set('flash_error', (string) ($analysis['error'] ?? 'Analytics service failed.'));
+                Response::redirect('/');
+            }
+
+            Response::view('pages/dataset_analytics', [
+                'user' => $user,
+                'dataset' => $dataset,
+                'analytics' => null,
+                'filters' => ['start_date' => $startDate, 'end_date' => $endDate],
+                'errorMessage' => (string) ($analysis['error'] ?? 'Analytics request failed.'),
+            ]);
+            return;
+        }
+
+        Response::view('pages/dataset_analytics', [
+            'user' => $user,
+            'dataset' => $dataset,
+            'analytics' => $analysis['data'],
+            'filters' => ['start_date' => $startDate, 'end_date' => $endDate],
+            'errorMessage' => null,
+        ]);
+    }
 }

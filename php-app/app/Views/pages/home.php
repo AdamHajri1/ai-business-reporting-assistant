@@ -84,6 +84,9 @@
                                     <a href="/datasets/preview?id=<?= urlencode((string) $dataset['id']) ?>">
                                         <?= $dataset['status'] === 'ready' ? 'View Preview' : 'Validate / Preview' ?>
                                     </a>
+                                    <?php if ($dataset['status'] === 'ready'): ?>
+                                        | <a href="/datasets/analyze?id=<?= urlencode((string) $dataset['id']) ?>">View Analytics</a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
