@@ -104,7 +104,7 @@ final class Report
                AND period_start = :period_start
                AND period_end = :period_end
                AND ai_model = :ai_model
-               AND prompt_version = :prompt_version
+               AND (prompt_version = :prompt_version OR prompt_version LIKE :prompt_version_locale)
              ORDER BY created_at DESC
              LIMIT 1'
         );
@@ -116,6 +116,7 @@ final class Report
             ':period_end' => $periodEnd,
             ':ai_model' => $aiModel,
             ':prompt_version' => $promptVersion,
+            ':prompt_version_locale' => $promptVersion . '-%',
         ]);
 
         $row = $stmt->fetch();

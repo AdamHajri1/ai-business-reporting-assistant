@@ -21,8 +21,10 @@ require_once dirname(__DIR__) . '/app/Controllers/AuthController.php';
 require_once dirname(__DIR__) . '/app/Controllers/DatasetController.php';
 require_once dirname(__DIR__) . '/app/Models/Report.php';
 require_once dirname(__DIR__) . '/app/Controllers/ReportController.php';
+require_once dirname(__DIR__) . '/app/Core/I18n.php';
 
 Session::start();
+I18n::init();
 
 $pdo = Database::connect($config['db']);
 $userModel = new User($pdo);

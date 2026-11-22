@@ -55,9 +55,13 @@ final class AnalyticsClient
     public function summarizeDataset(
         string $datasetId,
         ?string $startDate = null,
-        ?string $endDate = null
+        ?string $endDate = null,
+        string $locale = 'en'
     ): array {
-        $payload = ['dataset_id' => $datasetId];
+        $payload = [
+            'dataset_id' => $datasetId,
+            'locale' => $locale,
+        ];
 
         if ($startDate !== null && $startDate !== '') {
             $payload['start_date'] = $startDate;

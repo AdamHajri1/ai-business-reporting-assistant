@@ -39,10 +39,16 @@ final class ReportController
             Response::redirect('/datasets/preview?id=' . urlencode($datasetId));
         }
 
+        // 1. Grab active language ('en' or 'fr') and tag the prompt version
+        $locale = I18n::locale();
+        $promptVersion = self::PROMPT_VERSION . '-' . $locale;
+
+        // 2. Pass $locale to FastAPI so it writes the summary in EN or FR
         $result = $this->analyticsClient->summarizeDataset(
             $datasetId,
             $startDate !== '' ? $startDate : null,
-            $endDate !== '' ? $endDate : null
+            $endDate !== '' ? $endDate : null,
+            $locale
         );
 
         if (!$result['ok']) {
@@ -73,6 +79,7 @@ final class ReportController
 
         $aiModel = (string) ($summary['generation_mode'] ?? 'rule_based');
 
+        // 3. Check duplicates regardless of language (matches 'v1.0', 'v1.0-en', 'v1.0-fr')
         $existing = $this->reportModel->findExistingForUser(
             $userId,
             $datasetId,
@@ -83,7 +90,7 @@ final class ReportController
         );
 
         if ($existing !== null) {
-            Session::set('flash_warning', 'An executive report for this dataset and period already exists.');
+            Session::set('flash_warning', I18n::t('report.already_exists'));
             Response::redirect('/reports/show?id=' . (int) $existing['id']);
         }
 
@@ -95,10 +102,10 @@ final class ReportController
             $metricsJson,
             $summaryJson,
             $aiModel,
-            self::PROMPT_VERSION
+            $promptVersion
         );
 
-        Session::set('flash_success', 'Executive report generated and saved.');
+        Session::set('flash_success', I18n::t('report.generated_success'));
         Response::redirect('/reports/show?id=' . $reportId);
     }
 

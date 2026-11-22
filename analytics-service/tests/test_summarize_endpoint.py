@@ -53,3 +53,15 @@ def test_summarize_invalid_dataset_id():
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "INVALID_DATASET_ID"
+
+def test_summarize_french_locale(tmp_path, monkeypatch):
+    dataset_id = "f" * 32
+    (tmp_path / f"{dataset_id}.csv").write_text(SAMPLE_CSV, encoding="utf-8")
+    monkeypatch.setattr(csv_validator, "UPLOADS_DIR", tmp_path)
+
+    response = client.post("/summarize", json={"dataset_id": dataset_id, "locale": "fr"})
+
+    assert response.status_code == 200
+    summary = response.json()["data"]["summary"]
+    assert summary["locale"] == "fr"
+    assert "chiffre d'affaires" in summary["headline"].lower()

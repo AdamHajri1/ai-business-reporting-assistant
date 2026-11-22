@@ -24,4 +24,17 @@ return static function (
     $router->post('/login', [$authController, 'login']);
 
     $router->post('/logout', [$authController, 'logout']);
+    $router->post('/language', static function (): void {
+        if (Csrf::verify($_POST['_csrf_token'] ?? null)) {
+            $locale = trim((string) ($_POST['locale'] ?? 'en'));
+            I18n::setLocale($locale);
+        }
+
+        $redirect = trim((string) ($_POST['redirect'] ?? '/'));
+        if ($redirect === '' || $redirect[0] !== '/' || str_starts_with($redirect, '//')) {
+            $redirect = '/';
+        }
+
+        Response::redirect($redirect);
+    });
 };

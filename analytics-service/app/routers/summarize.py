@@ -12,7 +12,7 @@ class SummarizeRequest(BaseModel):
     dataset_id: str
     start_date: str | None = None
     end_date: str | None = None
-
+    locale: str = "en"
 
 @router.post("/summarize")
 def summarize_dataset_endpoint(payload: SummarizeRequest):
@@ -21,6 +21,7 @@ def summarize_dataset_endpoint(payload: SummarizeRequest):
             dataset_id=payload.dataset_id,
             start_date=payload.start_date,
             end_date=payload.end_date,
+            locale=payload.locale,
         )
     except ValidationInputError as exc:
         return JSONResponse(

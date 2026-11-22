@@ -10,7 +10,7 @@ $rowErrors = is_array($validation['row_errors'] ?? null) ? $validation['row_erro
 $previewRows = is_array($validation['preview'] ?? null) ? $validation['preview'] : [];
 $status = (string) $dataset['status'];
 
-$pageTitle = 'Dataset Validation';
+$pageTitle = I18n::t('preview.title');
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
@@ -18,35 +18,35 @@ require dirname(__DIR__) . '/layouts/header.php';
     <div>
         <h1><?= htmlspecialchars((string) $dataset['original_filename'], ENT_QUOTES, 'UTF-8') ?></h1>
         <p class="subtitle">
-            Status:
+            <?= htmlspecialchars(I18n::t('preview.status'), ENT_QUOTES, 'UTF-8') ?>:
             <span class="badge badge-<?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>">
                 <?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>
             </span>
         </p>
     </div>
     <div class="actions">
-        <a href="/" class="btn btn-secondary">← Back to Dashboard</a>
+        <a href="/" class="btn btn-secondary"><?= htmlspecialchars(I18n::t('preview.back_dashboard'), ENT_QUOTES, 'UTF-8') ?></a>
         <?php if ($status === 'ready'): ?>
-            <a href="/datasets/analyze?id=<?= urlencode((string) $dataset['id']) ?>" class="btn btn-primary">Open Analytics</a>
+            <a href="/datasets/analyze?id=<?= urlencode((string) $dataset['id']) ?>" class="btn btn-primary"><?= htmlspecialchars(I18n::t('preview.open_analytics'), ENT_QUOTES, 'UTF-8') ?></a>
         <?php endif; ?>
     </div>
 </div>
 
 <section class="kpi-grid">
     <div class="kpi-card">
-        <div class="kpi-label">Total Rows</div>
+        <div class="kpi-label"><?= htmlspecialchars(I18n::t('preview.total_rows'), ENT_QUOTES, 'UTF-8') ?></div>
         <div class="kpi-value"><?= number_format((int) ($validation['row_count'] ?? 0)) ?></div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-label">Valid Rows</div>
+        <div class="kpi-label"><?= htmlspecialchars(I18n::t('preview.valid_rows'), ENT_QUOTES, 'UTF-8') ?></div>
         <div class="kpi-value"><?= number_format((int) ($validation['valid_row_count'] ?? 0)) ?></div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-label">Error Rows</div>
+        <div class="kpi-label"><?= htmlspecialchars(I18n::t('preview.error_rows'), ENT_QUOTES, 'UTF-8') ?></div>
         <div class="kpi-value"><?= number_format((int) ($validation['error_row_count'] ?? 0)) ?></div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-label">Date Range</div>
+        <div class="kpi-label"><?= htmlspecialchars(I18n::t('preview.date_range'), ENT_QUOTES, 'UTF-8') ?></div>
         <div class="kpi-value" style="font-size:1.05rem;padding-top:0.35rem;">
             <?= htmlspecialchars((string) ($validation['date_min'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>
             →
@@ -57,26 +57,26 @@ require dirname(__DIR__) . '/layouts/header.php';
 
 <?php if ($missingColumns !== []): ?>
     <div class="alert alert-error" role="alert">
-        <strong>Missing Required Columns:</strong>
+        <strong><?= htmlspecialchars(I18n::t('preview.missing_columns'), ENT_QUOTES, 'UTF-8') ?></strong>
         <?= htmlspecialchars(implode(', ', $missingColumns), ENT_QUOTES, 'UTF-8') ?>
     </div>
 <?php endif; ?>
 
 <?php if ($rowErrors !== []): ?>
     <section class="card" role="alert">
-        <h2>Validation Errors (first <?= count($rowErrors) ?>)</h2>
+        <h2><?= htmlspecialchars(I18n::t('preview.validation_errors', ['count' => count($rowErrors)]), ENT_QUOTES, 'UTF-8') ?></h2>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>CSV Line</th>
-                        <th>Reason</th>
+                        <th><?= htmlspecialchars(I18n::t('preview.csv_line'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.reason'), ENT_QUOTES, 'UTF-8') ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($rowErrors as $err): ?>
                         <tr>
-                            <td><strong>Line <?= (int) ($err['row'] ?? 0) ?></strong></td>
+                            <td><strong><?= htmlspecialchars(I18n::t('preview.line_num', ['num' => (int) ($err['row'] ?? 0)]), ENT_QUOTES, 'UTF-8') ?></strong></td>
                             <td><?= htmlspecialchars((string) ($err['reason'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                         </tr>
                     <?php endforeach; ?>
@@ -88,17 +88,17 @@ require dirname(__DIR__) . '/layouts/header.php';
 
 <?php if ($previewRows !== []): ?>
     <section class="card">
-        <h2>Preview (first <?= count($previewRows) ?> valid rows)</h2>
+        <h2><?= htmlspecialchars(I18n::t('preview.valid_preview', ['count' => count($previewRows)]), ENT_QUOTES, 'UTF-8') ?></h2>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Order ID</th>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_date'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_order_id'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_product'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_category'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_quantity'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th><?= htmlspecialchars(I18n::t('preview.col_unit_price'), ENT_QUOTES, 'UTF-8') ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,16 +123,16 @@ require dirname(__DIR__) . '/layouts/header.php';
         <form method="POST" action="/datasets/confirm" class="actions">
             <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="dataset_id" value="<?= htmlspecialchars((string) $dataset['id'], ENT_QUOTES, 'UTF-8') ?>">
-            <button type="submit" class="btn btn-primary">Confirm Dataset for Analytics</button>
-            <span class="subtitle" style="margin:0;">All rows passed validation. Confirm to unlock KPI analytics and executive reports.</span>
+            <button type="submit" class="btn btn-primary"><?= htmlspecialchars(I18n::t('preview.confirm_btn'), ENT_QUOTES, 'UTF-8') ?></button>
+            <span class="subtitle" style="margin:0;"><?= htmlspecialchars(I18n::t('preview.confirm_hint'), ENT_QUOTES, 'UTF-8') ?></span>
         </form>
     <?php elseif ($status === 'ready'): ?>
         <div class="alert alert-success" role="status" style="margin:0;">
-            This dataset is confirmed and ready for analytics.
+            <?= htmlspecialchars(I18n::t('preview.ready_msg'), ENT_QUOTES, 'UTF-8') ?>
         </div>
     <?php else: ?>
         <div class="alert alert-error" role="alert" style="margin:0;">
-            This dataset cannot be confirmed until the errors above are fixed and re-uploaded.
+            <?= htmlspecialchars(I18n::t('preview.rejected_msg'), ENT_QUOTES, 'UTF-8') ?>
         </div>
     <?php endif; ?>
 </section>
