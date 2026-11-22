@@ -1,7 +1,8 @@
 <?php
 /** @var string $csrfToken */
-/** @var string|null $error */
+/** @var array<int, string> $errors */
 /** @var array{email?: string} $old */
+/** @var string|null $successMessage */
 
 $pageTitle = I18n::t('auth.login.title');
 $isAuthPage = true;
@@ -12,8 +13,22 @@ require dirname(__DIR__) . '/layouts/header.php';
     <h1><?= htmlspecialchars(I18n::t('auth.login.title'), ENT_QUOTES, 'UTF-8') ?></h1>
     <p class="subtitle" style="margin-bottom:1.25rem;"><?= htmlspecialchars(I18n::t('auth.login.subtitle'), ENT_QUOTES, 'UTF-8') ?></p>
 
-    <?php if (!empty($error)): ?>
-        <div class="alert alert-error" role="alert"><?= htmlspecialchars((string) $error, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php if (!empty($successMessage)): ?>
+        <div class="alert alert-success" role="status"><?= htmlspecialchars((string) $successMessage, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-error" role="alert">
+            <?php if (count($errors) === 1): ?>
+                <?= htmlspecialchars((string) $errors[0], ENT_QUOTES, 'UTF-8') ?>
+            <?php else: ?>
+                <ul style="margin:0;padding-left:1.2rem;">
+                    <?php foreach ($errors as $err): ?>
+                        <li><?= htmlspecialchars((string) $err, ENT_QUOTES, 'UTF-8') ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 
     <form method="POST" action="/login">

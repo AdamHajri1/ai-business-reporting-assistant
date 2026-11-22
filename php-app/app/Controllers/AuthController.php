@@ -102,7 +102,7 @@ final class AuthController
         if (!Csrf::verify($_POST['_csrf_token'] ?? null)) {
             Response::view('pages/login', [
                 'csrfToken' => Csrf::token(),
-                'errors' => ['Invalid security token. Please try again.'],
+                'errors' => [I18n::t('auth.error.csrf')],
                 'old' => ['email' => $email],
                 'successMessage' => null,
             ], 403);
@@ -112,7 +112,7 @@ final class AuthController
         if ($this->isThrottled()) {
             Response::view('pages/login', [
                 'csrfToken' => Csrf::token(),
-                'errors' => ['Too many failed login attempts. Please wait a few minutes before trying again.'],
+                'errors' => [I18n::t('auth.error.throttled')],
                 'old' => ['email' => $email],
                 'successMessage' => null,
             ], 429);
@@ -122,7 +122,7 @@ final class AuthController
         if ($email === '' || $password === '') {
             Response::view('pages/login', [
                 'csrfToken' => Csrf::token(),
-                'errors' => ['Email and password are required.'],
+                'errors' => [I18n::t('auth.error.required')],
                 'old' => ['email' => $email],
                 'successMessage' => null,
             ], 422);
@@ -136,7 +136,7 @@ final class AuthController
 
             Response::view('pages/login', [
                 'csrfToken' => Csrf::token(),
-                'errors' => ['Invalid email or password.'],
+                'errors' => [I18n::t('auth.error.invalid_credentials')],
                 'old' => ['email' => $email],
                 'successMessage' => null,
             ], 401);

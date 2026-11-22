@@ -69,8 +69,11 @@ final class ReportController
             Response::redirect('/datasets/analyze?id=' . urlencode($datasetId));
         }
 
+        $summaryForStorage = $summary;
+        $summaryForStorage['translations'] = [$locale => $summary];
+
         $metricsJson = json_encode($analytics, JSON_UNESCAPED_UNICODE);
-        $summaryJson = json_encode($summary, JSON_UNESCAPED_UNICODE);
+        $summaryJson = json_encode($summaryForStorage, JSON_UNESCAPED_UNICODE);
 
         if ($metricsJson === false || $summaryJson === false) {
             Session::set('flash_error', 'Failed to serialize report data.');
@@ -123,15 +126,23 @@ final class ReportController
         }
 
         $metrics = json_decode((string) $report['metrics_json'], true);
+        $metrics = is_array($metrics) ? $metrics : [];
         $summary = json_decode((string) $report['ai_summary'], true);
 
         if (!is_array($summary)) {
             $summary = [
-                'headline' => 'Executive Summary',
+                'headline' => I18n::t('report.default_headline'),
                 'executive_summary' => (string) $report['ai_summary'],
                 'key_findings' => [],
                 'recommendations' => [],
             ];
+        } else {
+            $activeLocale = I18n::locale();
+            $summary = $this->resolveSummaryForLocale($report, $metrics, $summary, $userId, $activeLocale);
+
+            if (is_string($summary['locale'] ?? null) && $summary['locale'] !== '') {
+                $report['prompt_version'] = self::PROMPT_VERSION . '-' . $summary['locale'];
+            }
         }
 
         $successMessage = Session::get('flash_success');
@@ -141,11 +152,104 @@ final class ReportController
 
         Response::view('pages/report_show', [
             'user' => $user,
+            'csrfToken' => Csrf::token(),
             'report' => $report,
-            'metrics' => is_array($metrics) ? $metrics : [],
+            'metrics' => $metrics,
             'summary' => $summary,
             'successMessage' => is_string($successMessage) ? $successMessage : null,
             'warningMessage' => is_string($warningMessage) ? $warningMessage : null,
         ]);
+    }
+
+    public function delete(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        $isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest'
+            || str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json');
+
+        if (!Csrf::verify($_POST['_csrf_token'] ?? null)) {
+            if ($isAjax) {
+                Response::json(['ok' => false, 'error' => 'Invalid security token. Please try again.'], 403);
+                return;
+            }
+            Session::set('flash_error', 'Invalid security token. Please try again.');
+            Response::redirect('/');
+        }
+
+        $reportId = (int) ($_POST['report_id'] ?? 0);
+        if ($reportId <= 0 || !$this->reportModel->deleteByIdForUser($reportId, $userId)) {
+            if ($isAjax) {
+                Response::json(['ok' => false, 'error' => I18n::t('report.not_found')], 404);
+                return;
+            }
+            Session::set('flash_error', I18n::t('report.not_found'));
+            Response::redirect('/');
+        }
+
+        if ($isAjax) {
+            Response::json(['ok' => true, 'message' => I18n::t('report.deleted_success')], 200);
+            return;
+        }
+
+        Session::set('flash_success', I18n::t('report.deleted_success'));
+        Response::redirect('/');
+    }
+
+    /**
+     * Return the report summary in the requested locale, generating and caching it
+     * from the saved metrics snapshot if that locale has not been generated yet.
+     *
+     * @param array<string, mixed> $report
+     * @param array<string, mixed> $metrics
+     * @param array<string, mixed> $summary
+     * @return array<string, mixed>
+     */
+    private function resolveSummaryForLocale(
+        array $report,
+        array $metrics,
+        array $summary,
+        int $userId,
+        string $activeLocale
+    ): array {
+        $translations = is_array($summary['translations'] ?? null) ? $summary['translations'] : [];
+        if (is_array($translations[$activeLocale] ?? null)) {
+            return $translations[$activeLocale];
+        }
+
+        $baseLocale = is_string($summary['locale'] ?? null) && $summary['locale'] !== ''
+            ? (string) $summary['locale']
+            : 'en';
+
+        if ($baseLocale === $activeLocale) {
+            return $summary;
+        }
+
+        if (!is_array($metrics['kpis'] ?? null)) {
+            return $summary;
+        }
+
+        $translated = $this->analyticsClient->summarizeMetrics($metrics, $activeLocale);
+        if (!$translated['ok'] || !is_array($translated['data']['summary'] ?? null)) {
+            return $summary;
+        }
+
+        $localizedSummary = $translated['data']['summary'];
+
+        if (!isset($translations[$baseLocale])) {
+            $baseSummary = $summary;
+            unset($baseSummary['translations']);
+            $translations[$baseLocale] = $baseSummary;
+        }
+        $translations[$activeLocale] = $localizedSummary;
+
+        $summary['translations'] = $translations;
+        $updatedJson = json_encode($summary, JSON_UNESCAPED_UNICODE);
+        if ($updatedJson !== false) {
+            $this->reportModel->updateSummary((int) $report['id'], $userId, $updatedJson);
+        }
+
+        return $localizedSummary;
     }
 }

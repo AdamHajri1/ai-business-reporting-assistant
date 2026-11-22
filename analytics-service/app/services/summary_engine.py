@@ -2,6 +2,7 @@ from typing import Any
 
 from app.services.kpi_engine import analyze_dataset
 
+from app.services.llm_service import generate_llm_summary, verify_numbers_against_metrics
 
 def build_executive_summary(analytics: dict[str, Any], locale: str = "en") -> dict[str, Any]:
     lang = "fr" if str(locale).strip().lower() == "fr" else "en"
@@ -100,14 +101,40 @@ def build_executive_summary(analytics: dict[str, Any], locale: str = "en") -> di
                 f"Proposer des offres groupées autour de {top_products[0]['product']} pour augmenter le panier moyen au-dessus de ${aov:,.2f}."
             )
 
-        return {
+        interpretations: list[str] = []
+        if categories:
+            lead_cat = categories[0]
+            if float(lead_cat["revenue_share_pct"]) >= 50.0:
+                interpretations.append(
+                    f"La forte concentration sur {lead_cat['category']} ({lead_cat['revenue_share_pct']:.2f}%) indique une dépendance élevée à une seule catégorie."
+                )
+            else:
+                interpretations.append(
+                    f"Les ventes sont réparties sur plusieurs catégories, avec {lead_cat['category']} en tête ({lead_cat['revenue_share_pct']:.2f}%)."
+                )
+        if comparison and comparison.get("revenue_change_pct") is not None:
+            pct = float(comparison["revenue_change_pct"])
+            if pct > 0:
+                interpretations.append(
+                    f"La dynamique est positive avec une hausse de {pct:.2f}% entre {comparison['previous_month']} et {comparison['current_month']}."
+                )
+            elif pct < 0:
+                interpretations.append(
+                    f"Le repli de {abs(pct):.2f}% en {comparison['current_month']} signale un ralentissement commercial à surveiller."
+                )
+
+        result = {
             "generation_mode": "rule_based",
             "locale": "fr",
             "headline": headline,
             "executive_summary": " ".join(summary_parts),
+            "facts": key_findings,
             "key_findings": key_findings,
+            "interpretations": interpretations,
             "recommendations": recommendations,
         }
+        result["number_check"] = verify_numbers_against_metrics(result, analytics)
+        return result
 
     # English (default)
     if comparison and comparison.get("revenue_change_pct") is not None:
@@ -201,14 +228,48 @@ def build_executive_summary(analytics: dict[str, Any], locale: str = "en") -> di
             f"Bundle {top_products[0]['product']} with lower-performing items to lift Average Order Value above ${aov:,.2f}."
         )
 
-    return {
+    interpretations = []
+    if categories:
+        lead_cat = categories[0]
+        if float(lead_cat["revenue_share_pct"]) >= 50.0:
+            interpretations.append(
+                f"High revenue concentration in {lead_cat['category']} ({lead_cat['revenue_share_pct']:.2f}%) indicates reliance on a single category."
+            )
+        else:
+            interpretations.append(
+                f"Revenue is diversified across categories, led by {lead_cat['category']} ({lead_cat['revenue_share_pct']:.2f}%)."
+            )
+    if comparison and comparison.get("revenue_change_pct") is not None:
+        pct = float(comparison["revenue_change_pct"])
+        if pct > 0:
+            interpretations.append(
+                f"Momentum is positive with {pct:.2f}% revenue growth from {comparison['previous_month']} to {comparison['current_month']}."
+            )
+        elif pct < 0:
+            interpretations.append(
+                f"The {abs(pct):.2f}% decline in {comparison['current_month']} signals softening demand that warrants attention."
+            )
+
+    result = {
         "generation_mode": "rule_based",
         "locale": "en",
         "headline": headline,
         "executive_summary": " ".join(summary_parts),
+        "facts": key_findings,
         "key_findings": key_findings,
+        "interpretations": interpretations,
         "recommendations": recommendations,
     }
+    result["number_check"] = verify_numbers_against_metrics(result, analytics)
+    return result
+
+
+def summarize_metrics(
+    analytics: dict[str, Any],
+    locale: str = "en",
+) -> dict[str, Any]:
+    lang = "fr" if str(locale).strip().lower() == "fr" else "en"
+    return generate_llm_summary(analytics, locale=lang) or build_executive_summary(analytics, locale=lang)
 
 
 def summarize_dataset(
@@ -222,7 +283,7 @@ def summarize_dataset(
         start_date=start_date,
         end_date=end_date,
     )
-    summary = build_executive_summary(analytics, locale=locale)
+    summary = summarize_metrics(analytics, locale=locale)
 
     return {
         "dataset_id": dataset_id,

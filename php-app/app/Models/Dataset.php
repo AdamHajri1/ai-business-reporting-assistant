@@ -112,4 +112,38 @@ final class Dataset
             ':user_id' => $userId,
         ]);
     }
+
+    public function deleteByIdForUser(string $id, int $userId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM datasets
+             WHERE id = :id AND user_id = :user_id'
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':user_id' => $userId,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function findPotentialDuplicatesForUser(int $userId, string $originalFilename, int $fileSizeBytes): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, original_filename, stored_filename, file_size_bytes
+             FROM datasets
+             WHERE user_id = :user_id
+               AND status != :deleted
+               AND (LOWER(original_filename) = LOWER(:original_filename) OR file_size_bytes = :file_size_bytes)'
+        );
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':deleted' => 'deleted',
+            ':original_filename' => $originalFilename,
+            ':file_size_bytes' => $fileSizeBytes,
+        ]);
+
+        return $stmt->fetchAll();
+    }
 }

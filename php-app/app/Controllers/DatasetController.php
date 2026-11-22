@@ -58,13 +58,37 @@ final class DatasetController
         }
 
         $datasetId = (string) $result['dataset_id'];
+        $originalFilename = (string) $result['original_filename'];
+        $storedFilename = (string) $result['stored_filename'];
+        $fileSizeBytes = (int) $result['file_size_bytes'];
+
+        $candidates = $this->datasetModel->findPotentialDuplicatesForUser(
+            $userId,
+            $originalFilename,
+            $fileSizeBytes
+        );
+
+        foreach ($candidates as $existing) {
+            $sameName = mb_strtolower((string) $existing['original_filename'], 'UTF-8') === mb_strtolower($originalFilename, 'UTF-8');
+            $sameContent = (int) $existing['file_size_bytes'] === $fileSizeBytes
+                && $this->uploadService->filesHaveSameHash($storedFilename, (string) $existing['stored_filename']);
+
+            if ($sameName || $sameContent) {
+                $this->uploadService->deleteStoredFile($storedFilename);
+                Session::set(
+                    'flash_error',
+                    I18n::t('dataset.duplicate_exists', ['name' => (string) $existing['original_filename']])
+                );
+                Response::redirect('/');
+            }
+        }
 
         $this->datasetModel->create(
             $datasetId,
             $userId,
-            (string) $result['original_filename'],
-            (string) $result['stored_filename'],
-            (int) $result['file_size_bytes']
+            $originalFilename,
+            $storedFilename,
+            $fileSizeBytes
         );
 
         Response::redirect('/datasets/preview?id=' . urlencode($datasetId));
@@ -197,5 +221,49 @@ final class DatasetController
             'filters' => ['start_date' => $startDate, 'end_date' => $endDate],
             'errorMessage' => null,
         ]);
+    }
+
+    public function delete(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        $isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest'
+            || str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json');
+
+        if (!Csrf::verify($_POST['_csrf_token'] ?? null)) {
+            if ($isAjax) {
+                Response::json(['ok' => false, 'error' => I18n::t('auth.error.csrf')], 403);
+                return;
+            }
+            Session::set('flash_error', I18n::t('auth.error.csrf'));
+            Response::redirect('/');
+        }
+
+        $datasetId = trim((string) ($_POST['dataset_id'] ?? ''));
+        $dataset = $datasetId !== '' ? $this->datasetModel->findByIdForUser($datasetId, $userId) : null;
+
+        if ($dataset === null || !$this->datasetModel->deleteByIdForUser($datasetId, $userId)) {
+            if ($isAjax) {
+                Response::json(['ok' => false, 'error' => I18n::t('dataset.not_found')], 404);
+                return;
+            }
+            Session::set('flash_error', I18n::t('dataset.not_found'));
+            Response::redirect('/');
+        }
+
+        $this->uploadService->deleteStoredFile((string) $dataset['stored_filename']);
+
+        if ($isAjax) {
+            Response::json([
+                'ok' => true,
+                'dataset_id' => $datasetId,
+                'message' => I18n::t('dataset.deleted_success'),
+            ], 200);
+            return;
+        }
+
+        Session::set('flash_success', I18n::t('dataset.deleted_success'));
+        Response::redirect('/');
     }
 }

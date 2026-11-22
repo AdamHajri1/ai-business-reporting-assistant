@@ -80,6 +80,34 @@ final class UploadService
         ];
     }
 
+    public function deleteStoredFile(string $storedFilename): void
+    {
+        $safeName = basename($storedFilename);
+        if ($safeName === '' || $safeName === '.' || $safeName === '..') {
+            return;
+        }
+
+        $path = rtrim($this->uploadsDir, "\\/") . DIRECTORY_SEPARATOR . $safeName;
+        if (is_file($path)) {
+            @unlink($path);
+        }
+    }
+
+    public function filesHaveSameHash(string $storedFilenameA, string $storedFilenameB): bool
+    {
+        $pathA = rtrim($this->uploadsDir, "\\/") . DIRECTORY_SEPARATOR . basename($storedFilenameA);
+        $pathB = rtrim($this->uploadsDir, "\\/") . DIRECTORY_SEPARATOR . basename($storedFilenameB);
+
+        if (!is_file($pathA) || !is_file($pathB)) {
+            return false;
+        }
+
+        $hashA = hash_file('sha256', $pathA);
+        $hashB = hash_file('sha256', $pathB);
+
+        return is_string($hashA) && is_string($hashB) && hash_equals($hashA, $hashB);
+    }
+
     private function sanitizeDisplayName(string $rawName): string
     {
         $base = basename($rawName);

@@ -73,6 +73,18 @@ final class AnalyticsClient
 
         return $this->request('POST', '/summarize', $payload);
     }
+
+    /**
+     * @param array<string, mixed> $analytics
+     * @return array{ok: bool, data?: array<string, mixed>, error?: string}
+     */
+    public function summarizeMetrics(array $analytics, string $locale = 'en'): array
+    {
+        return $this->request('POST', '/summarize/from-metrics', [
+            'analytics' => $analytics,
+            'locale' => $locale,
+        ]);
+    }
     /**
      * @param array<string, mixed>|null $payload
      * @return array{ok: bool, data?: array<string, mixed>, error?: string}

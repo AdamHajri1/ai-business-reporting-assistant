@@ -123,4 +123,34 @@ final class Report
 
         return $row !== false ? $row : null;
     }
+
+    public function updateSummary(int $id, int $userId, string $aiSummary): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE reports
+             SET ai_summary = :ai_summary
+             WHERE id = :id AND user_id = :user_id'
+        );
+
+        $stmt->execute([
+            ':ai_summary' => $aiSummary,
+            ':id' => $id,
+            ':user_id' => $userId,
+        ]);
+    }
+
+    public function deleteByIdForUser(int $id, int $userId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM reports
+             WHERE id = :id AND user_id = :user_id'
+        );
+
+        $stmt->execute([
+            ':id' => $id,
+            ':user_id' => $userId,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

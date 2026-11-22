@@ -1,5 +1,6 @@
 <?php
 /** @var array{id: int, name: string, email: string, role: string} $user */
+/** @var string $csrfToken */
 /** @var array<string, mixed> $report */
 /** @var array<string, mixed> $metrics */
 /** @var array<string, mixed> $summary */
@@ -7,8 +8,13 @@
 /** @var string|null $warningMessage */
 
 $kpis = is_array($metrics['kpis'] ?? null) ? $metrics['kpis'] : null;
-$keyFindings = is_array($summary['key_findings'] ?? null) ? $summary['key_findings'] : [];
+$facts = is_array($summary['facts'] ?? null)
+    ? $summary['facts']
+    : (is_array($summary['key_findings'] ?? null) ? $summary['key_findings'] : []);
+$interpretations = is_array($summary['interpretations'] ?? null) ? $summary['interpretations'] : [];
 $recommendations = is_array($summary['recommendations'] ?? null) ? $summary['recommendations'] : [];
+$numberCheck = is_array($summary['number_check'] ?? null) ? $summary['number_check'] : null;
+$keyFindings = is_array($summary['key_findings'] ?? null) ? $summary['key_findings'] : [];
 $monthlyTrends = is_array($metrics['monthly_trends'] ?? null) ? $metrics['monthly_trends'] : [];
 
 $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
@@ -33,6 +39,12 @@ require dirname(__DIR__) . '/layouts/header.php';
         <a href="/" class="btn btn-secondary"><?= htmlspecialchars(I18n::t('report.back_dashboard'), ENT_QUOTES, 'UTF-8') ?></a>
         <a href="/datasets/analyze?id=<?= urlencode((string) $report['dataset_id']) ?>" class="btn btn-secondary"><?= htmlspecialchars(I18n::t('report.live_analytics'), ENT_QUOTES, 'UTF-8') ?></a>
         <button type="button" class="btn btn-primary" onclick="window.print()"><?= htmlspecialchars(I18n::t('report.print_pdf'), ENT_QUOTES, 'UTF-8') ?></button>
+        <form method="POST" action="/reports/delete" style="margin:0;"
+              data-confirm="<?= htmlspecialchars(I18n::t('report.delete_confirm', ['id' => (int) $report['id']]), ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="report_id" value="<?= (int) $report['id'] ?>">
+            <button type="submit" class="btn btn-danger"><?= htmlspecialchars(I18n::t('report.delete_btn'), ENT_QUOTES, 'UTF-8') ?></button>
+        </form>
     </div>
 </div>
 
@@ -45,12 +57,23 @@ require dirname(__DIR__) . '/layouts/header.php';
 <?php endif; ?>
 
 <section class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;margin-bottom:0.65rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.65rem;">
         <h2 style="margin:0;"><?= htmlspecialchars((string) ($summary['headline'] ?? I18n::t('report.default_headline')), ENT_QUOTES, 'UTF-8') ?></h2>
-        <span class="badge badge-validated">
-            <?= htmlspecialchars((string) $report['ai_model'], ENT_QUOTES, 'UTF-8') ?>
-            (<?= htmlspecialchars((string) $report['prompt_version'], ENT_QUOTES, 'UTF-8') ?>)
-        </span>
+        <div class="actions">
+            <?php if ($numberCheck !== null && !empty($numberCheck['passed'])): ?>
+                <span class="badge badge-ready">
+                    ✓ <?= htmlspecialchars(I18n::t('report.verified_badge', ['count' => (int) ($numberCheck['checked_count'] ?? 0)]), ENT_QUOTES, 'UTF-8') ?>
+                </span>
+            <?php elseif ($numberCheck !== null): ?>
+                <span class="badge badge-rejected">
+                    <?= htmlspecialchars(I18n::t('report.unverified_badge'), ENT_QUOTES, 'UTF-8') ?>
+                </span>
+            <?php endif; ?>
+            <span class="badge badge-validated">
+                <?= htmlspecialchars((string) $report['ai_model'], ENT_QUOTES, 'UTF-8') ?>
+                (<?= htmlspecialchars((string) $report['prompt_version'], ENT_QUOTES, 'UTF-8') ?>)
+            </span>
+        </div>
     </div>
     <p style="margin:0;font-size:1rem;"><?= htmlspecialchars((string) ($summary['executive_summary'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
 </section>
@@ -76,17 +99,30 @@ require dirname(__DIR__) . '/layouts/header.php';
     </section>
 <?php endif; ?>
 
-<section class="grid-2">
+<section class="grid-3">
     <div class="card">
-        <h2><?= htmlspecialchars(I18n::t('report.key_findings'), ENT_QUOTES, 'UTF-8') ?></h2>
-        <?php if ($keyFindings !== []): ?>
+        <h2><?= htmlspecialchars(I18n::t('report.facts'), ENT_QUOTES, 'UTF-8') ?></h2>
+        <?php if ($facts !== []): ?>
             <ul style="margin:0;padding-left:1.25rem;">
-                <?php foreach ($keyFindings as $finding): ?>
-                    <li style="margin-bottom:0.45rem;"><?= htmlspecialchars((string) $finding, ENT_QUOTES, 'UTF-8') ?></li>
+                <?php foreach ($facts as $fact): ?>
+                    <li style="margin-bottom:0.45rem;"><?= htmlspecialchars((string) $fact, ENT_QUOTES, 'UTF-8') ?></li>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
             <p class="subtitle"><?= htmlspecialchars(I18n::t('report.no_findings'), ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
+    </div>
+
+    <div class="card">
+        <h2><?= htmlspecialchars(I18n::t('report.interpretations'), ENT_QUOTES, 'UTF-8') ?></h2>
+        <?php if ($interpretations !== []): ?>
+            <ul style="margin:0;padding-left:1.25rem;">
+                <?php foreach ($interpretations as $interp): ?>
+                    <li style="margin-bottom:0.45rem;"><?= htmlspecialchars((string) $interp, ENT_QUOTES, 'UTF-8') ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p class="subtitle"><?= htmlspecialchars(I18n::t('report.no_interpretations'), ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
     </div>
 

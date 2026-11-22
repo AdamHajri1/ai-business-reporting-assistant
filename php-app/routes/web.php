@@ -13,9 +13,11 @@ return static function (
     $router->get('/datasets/preview', [$datasetController, 'preview']);
     $router->post('/datasets/confirm', [$datasetController, 'confirm']);
     $router->get('/datasets/analyze', [$datasetController, 'analyze']);
+    $router->post('/datasets/delete', [$datasetController, 'delete']);
 
     $router->post('/reports/generate', [$reportController, 'generate']);
     $router->get('/reports/show', [$reportController, 'show']);
+    $router->post('/reports/delete', [$reportController, 'delete']);
 
     $router->get('/register', [$authController, 'showRegister']);
     $router->post('/register', [$authController, 'register']);

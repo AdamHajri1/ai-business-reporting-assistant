@@ -1,7 +1,14 @@
+import pytest
+from app.services import csv_validator, summary_engine
+
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.services import csv_validator
+
+@pytest.fixture(autouse=True)
+def disable_live_llm(monkeypatch):
+    monkeypatch.setattr(summary_engine, "generate_llm_summary", lambda analytics, locale="en": None)
 
 client = TestClient(app)
 
@@ -65,3 +72,31 @@ def test_summarize_french_locale(tmp_path, monkeypatch):
     summary = response.json()["data"]["summary"]
     assert summary["locale"] == "fr"
     assert "chiffre d'affaires" in summary["headline"].lower()
+
+
+def test_summarize_from_metrics_switches_locale(tmp_path, monkeypatch):
+    dataset_id = "a" * 32
+    (tmp_path / f"{dataset_id}.csv").write_text(SAMPLE_CSV, encoding="utf-8")
+    monkeypatch.setattr(csv_validator, "UPLOADS_DIR", tmp_path)
+
+    fr_response = client.post("/summarize", json={"dataset_id": dataset_id, "locale": "fr"})
+    assert fr_response.status_code == 200
+    analytics = fr_response.json()["data"]["analytics"]
+
+    en_response = client.post(
+        "/summarize/from-metrics",
+        json={"analytics": analytics, "locale": "en"},
+    )
+    assert en_response.status_code == 200
+    en_summary = en_response.json()["data"]["summary"]
+    assert en_summary["locale"] == "en"
+    assert "revenue" in en_summary["headline"].lower()
+
+    fr_again = client.post(
+        "/summarize/from-metrics",
+        json={"analytics": analytics, "locale": "fr"},
+    )
+    assert fr_again.status_code == 200
+    fr_summary = fr_again.json()["data"]["summary"]
+    assert fr_summary["locale"] == "fr"
+    assert "chiffre d'affaires" in fr_summary["headline"].lower()

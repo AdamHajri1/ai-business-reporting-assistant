@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 5 completed — Core MVP finished
-Last confirmed result: Shared SaaS layout (`app.css`, `header.php`, `footer.php`), KPI cards, Chart.js visualizations, Print/Save PDF reports, and duplicate-report prevention with orange warning alert verified in the browser.
+## Current step: Phase 6 completed — Ready for Phase 7 (Step 43: Security Review & Hardening)
+Last confirmed result: Full EN/FR localization, live `gemini-3.1-flash-lite` integration via `.env`, strict grounding prompt, automated number-check guardrail with `rule_based` fallback, 3-part AI panel (Verified Facts, Interpretations, Recommendations) with green Verified badge on `report_show.php`, cross-language duplicate-report prevention, and all 18 `pytest` tests passing.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -46,10 +46,10 @@ Blocking issue (if any): None.
 - [x] Print / Save PDF styling (`@media print`) and duplicate-report prevention with warning alert verified
 
 ### Phase 6 — LLM
-- [ ] API key in environment only
-- [ ] Prompt + grounding rules
-- [ ] AI panel with facts / interpretations / recommendations
-- [ ] Number-check against verified metrics
+- [x] API key in environment only
+- [x] Prompt + grounding rules
+- [x] AI panel with facts / interpretations / recommendations
+- [x] Number-check against verified metrics
 
 ### Phase 7 — Reports & refinement
 - [ ] Report page + print/PDF
