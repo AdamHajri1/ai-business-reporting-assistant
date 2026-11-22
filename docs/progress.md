@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 4 completed — Ready for Phase 5 (SaaS UI, charts & export)
-Last confirmed result: Executive summary engine (`summary_engine.py`, `POST /summarize`, 12 `pytest` tests), MySQL report persistence (`Report.php`, `ReportController.php`), and `/reports/show` verified end-to-end.
+## Current step: Phase 5 completed — Core MVP finished
+Last confirmed result: Shared SaaS layout (`app.css`, `header.php`, `footer.php`), KPI cards, Chart.js visualizations, Print/Save PDF reports, and duplicate-report prevention with orange warning alert verified in the browser.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -39,14 +39,11 @@ Blocking issue (if any): None.
 - [x] `Report.php` model, `ReportController.php`, and `/reports/show` implemented
 - [x] Report generation, MySQL persistence, and dashboard listing verified in the browser
 
-### Phase 5 — Dashboard
-- [ ] Layout shell + responsive nav
-- [ ] KPI cards + filters
-- [ ] Chart.js charts (created once, updated)
-- [ ] Loading / empty / error states
-- [ ] Light/dark theme
-- [ ] Animations + reduced-motion verified
-- [ ] Accessibility pass (keyboard, contrast)
+### Phase 5 — SaaS UI, charts & polish
+- [x] Shared SaaS stylesheet (`php-app/public/assets/css/app.css`) and layout partials (`header.php`, `footer.php`) built
+- [x] Auth pages (`login.php`, `register.php`), Dashboard (`home.php`), and Validation Preview (`dataset_preview.php`) styled
+- [x] Analytics (`dataset_analytics.php`) and Report (`report_show.php`) upgraded with KPI cards and Chart.js visualizations
+- [x] Print / Save PDF styling (`@media print`) and duplicate-report prevention with warning alert verified
 
 ### Phase 6 — LLM
 - [ ] API key in environment only

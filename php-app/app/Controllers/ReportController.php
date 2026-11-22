@@ -73,6 +73,20 @@ final class ReportController
 
         $aiModel = (string) ($summary['generation_mode'] ?? 'rule_based');
 
+        $existing = $this->reportModel->findExistingForUser(
+            $userId,
+            $datasetId,
+            $periodStart,
+            $periodEnd,
+            $aiModel,
+            self::PROMPT_VERSION
+        );
+
+        if ($existing !== null) {
+            Session::set('flash_warning', 'An executive report for this dataset and period already exists.');
+            Response::redirect('/reports/show?id=' . (int) $existing['id']);
+        }
+
         $reportId = $this->reportModel->create(
             $userId,
             $datasetId,
@@ -114,7 +128,9 @@ final class ReportController
         }
 
         $successMessage = Session::get('flash_success');
+        $warningMessage = Session::get('flash_warning');
         Session::remove('flash_success');
+        Session::remove('flash_warning');
 
         Response::view('pages/report_show', [
             'user' => $user,
@@ -122,6 +138,7 @@ final class ReportController
             'metrics' => is_array($metrics) ? $metrics : [],
             'summary' => $summary,
             'successMessage' => is_string($successMessage) ? $successMessage : null,
+            'warningMessage' => is_string($warningMessage) ? $warningMessage : null,
         ]);
     }
 }

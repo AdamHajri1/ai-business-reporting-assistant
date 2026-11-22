@@ -88,4 +88,38 @@ final class Report
 
         return $stmt->fetchAll();
     }
+    public function findExistingForUser(
+        int $userId,
+        string $datasetId,
+        string $periodStart,
+        string $periodEnd,
+        string $aiModel,
+        string $promptVersion
+    ): ?array {
+        $stmt = $this->pdo->prepare(
+            'SELECT id
+             FROM reports
+             WHERE user_id = :user_id
+               AND dataset_id = :dataset_id
+               AND period_start = :period_start
+               AND period_end = :period_end
+               AND ai_model = :ai_model
+               AND prompt_version = :prompt_version
+             ORDER BY created_at DESC
+             LIMIT 1'
+        );
+
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':dataset_id' => $datasetId,
+            ':period_start' => $periodStart,
+            ':period_end' => $periodEnd,
+            ':ai_model' => $aiModel,
+            ':prompt_version' => $promptVersion,
+        ]);
+
+        $row = $stmt->fetch();
+
+        return $row !== false ? $row : null;
+    }
 }
