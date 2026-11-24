@@ -231,20 +231,3 @@ ai-business-reporting-assistant/
     │   └── Views/                        # Layouts & pages (dashboard, analytics, reports, auth)
     └── tests/                            # PHP integration & utility test scripts
 ```
-
----
-
-## Screenshots
-
-<!-- Drop your screenshots into docs/screenshots/ and uncomment the lines below -->
-
-<!--
-### Dashboard & CSV Upload
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Grounded AI Executive Report (Verified Badge)
-![AI Executive Report](docs/screenshots/report-verified.png)
-
-### A4 Print / Save-as-PDF View
-![Print PDF View](docs/screenshots/report-print-pdf.png)
--->
