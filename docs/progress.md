@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 6 completed — Ready for Phase 7 (Step 43: Security Review & Hardening)
-Last confirmed result: Full EN/FR localization, live `gemini-3.1-flash-lite` integration via `.env`, strict grounding prompt, automated number-check guardrail with `rule_based` fallback, 3-part AI panel (Verified Facts, Interpretations, Recommendations) with green Verified badge on `report_show.php`, cross-language duplicate-report prevention, and all 18 `pytest` tests passing.
+## Current step: Phase 7 completed — Production-Ready MVP Finished
+Last confirmed result: HTTP security headers verified with zero CSP errors, strict session flags active, CSRF and `user_id` IDOR protections confirmed, Print/PDF and mobile responsive views verified, and all 18 `pytest` tests passing.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -51,11 +51,11 @@ Blocking issue (if any): None.
 - [x] AI panel with facts / interpretations / recommendations
 - [x] Number-check against verified metrics
 
-### Phase 7 — Reports & refinement
-- [ ] Report page + print/PDF
-- [ ] (Optional) saved history
-- [ ] Security review (Section 9)
-- [ ] Performance + responsive refinements
+- [x] **Phase 7 — Security Hardening, Reports Refinement & Responsive Polish**
+  - Added HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Content-Security-Policy` with `cdn.jsdelivr.net` support) in `php-app/public/index.php`.
+  - Enforced strict session cookie flags (`use_strict_mode`, `HttpOnly`, `SameSite=Lax`) in `php-app/app/Core/Session.php`.
+  - Audited all controllers and models to confirm CSRF verification on every `POST` action and `user_id` scoping on every `Dataset` and `Report` query.
+  - Refined `@media print` (A4 layout, color preservation, `break-inside: avoid`, hidden UI chrome) and added `@media (max-width: 768px)` responsive layout rules in `php-app/public/assets/css/app.css`.
 
 ### Phase 8 — Portfolio
 - [ ] README + install guide

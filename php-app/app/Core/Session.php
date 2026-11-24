@@ -6,22 +6,17 @@ final class Session
 {
     public static function start(): void
     {
-        if (session_status() !== PHP_SESSION_NONE) {
-            return;
+        if (session_status() === PHP_SESSION_NONE) {
+            ini_set('session.use_strict_mode', '1');
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            ]);
+            session_start();
         }
-
-        $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-
-        ini_set('session.use_strict_mode', '1');
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'secure' => $isHttps,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-
-        session_start();
     }
 
     public static function regenerate(): void

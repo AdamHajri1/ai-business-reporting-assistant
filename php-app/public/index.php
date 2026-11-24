@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:;");
+
 $config = require dirname(__DIR__) . '/config/config.php';
 
 ini_set('display_errors', $config['app']['debug'] ? '1' : '0');
