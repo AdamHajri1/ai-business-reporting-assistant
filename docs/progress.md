@@ -1,7 +1,7 @@
 # Project Progress
 
-## Current step: Phase 7 completed — Production-Ready MVP Finished
-Last confirmed result: HTTP security headers verified with zero CSP errors, strict session flags active, CSRF and `user_id` IDOR protections confirmed, Print/PDF and mobile responsive views verified, and all 18 `pytest` tests passing.
+## Current step: Phase 8 completed — Project Packaged & Portfolio-Ready
+Last confirmed result: `start.ps1`, `samples/demo_sales.csv`, product-name guardrail fix, and `README.md` verified; all 18 `pytest` tests passing and PHP lint clean.
 Blocking issue (if any): None.
 
 ### Phase 0 — Environment
@@ -57,9 +57,8 @@ Blocking issue (if any): None.
   - Audited all controllers and models to confirm CSRF verification on every `POST` action and `user_id` scoping on every `Dataset` and `Report` query.
   - Refined `@media print` (A4 layout, color preservation, `break-inside: avoid`, hidden UI chrome) and added `@media (max-width: 768px)` responsive layout rules in `php-app/public/assets/css/app.css`.
 
-### Phase 8 — Portfolio
-- [ ] README + install guide
-- [ ] Architecture diagram
-- [ ] Sample CSV + demo script
-- [ ] Screenshots
-- [ ] GitHub repository published
+- [x] **Phase 8 — Packaging, Guardrail Refinement & Portfolio Documentation**
+  - Added one-click Windows launcher (`start.ps1`) to boot FastAPI (`:8000`) and PHP (`:8080`) together.
+  - Created a realistic 4-month demo dataset (`samples/demo_sales.csv`) matching the 6-column validator schema.
+  - Patched `verify_numbers_against_metrics()` in `analytics-service/app/services/llm_service.py` to strip known product/category labels before numeric extraction, eliminating false positives on names like `ProBook 14 Laptop` and `27-inch 4K Monitor`.
+  - Wrote a complete, portfolio-ready `README.md` covering architecture, grounded AI guardrails, security hardening, setup steps, and testing.

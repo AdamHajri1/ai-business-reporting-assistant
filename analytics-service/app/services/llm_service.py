@@ -73,6 +73,22 @@ def _collect_verified_numbers(analytics: dict[str, Any]) -> set[float]:
     _walk(analytics)
     return verified
 
+def _collect_entity_labels(analytics: dict[str, Any]) -> list[str]:
+    labels: set[str] = set()
+
+    def _walk(node: Any) -> None:
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in ("product", "category", "name") and isinstance(v, str) and v.strip():
+                    labels.add(v.strip())
+                else:
+                    _walk(v)
+        elif isinstance(node, list):
+            for item in node:
+                _walk(item)
+
+    _walk(analytics)
+    return sorted(labels, key=len, reverse=True)
 
 def extract_numbers_from_text(text: str) -> list[tuple[str, float]]:
     # Strip YYYY-MM-DD / YYYY-MM dates first
@@ -104,7 +120,10 @@ def verify_numbers_against_metrics(
         if isinstance(items, list):
             text_chunks.extend(str(item) for item in items)
 
-    extracted = extract_numbers_from_text("\n".join(text_chunks))
+    combined_text = "\n".join(text_chunks)
+    for label in _collect_entity_labels(analytics):
+        combined_text = re.sub(re.escape(label), " ", combined_text, flags=re.IGNORECASE)
+    extracted = extract_numbers_from_text(combined_text)
     unverified: list[str] = []
 
     for raw, num in extracted:
